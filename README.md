@@ -144,12 +144,13 @@ Note que inserimos a tag HTML "H1" no texto enviado ao navegador e
 você provavelmente vai ver a mensagem com caracteres maiores
 na janela do seu browser.
 
-Muito bem. Até agora tivemos uma passada rápida na funcionaliade
+Muito bem. Até agora tivemos uma passada rápida na funcionalidade
 de rotas do Express.
 Agora imagine que seu código vai crescendo, você vai acrescentando
 mais funções e as linhas de código vão aumentando e ele vai ficando
 bem feinho, parecendo uma linguiça enorme de linhas de código. Algo
-bem pior do que o código abaixo:
+bem pior do que o código abaixo (eu só inseri um monte de espaços
+como comentários para "dar o efeito visual" de um código mais longo):
 
 	var express = require('express'); // carrega o módulo ExpressJS
 	var app = new express(); // cria uma instância
@@ -287,7 +288,7 @@ A parte do código fica assim:
 	.
 	.
 	.
-	app.get('/soma', function(req, res) {
+	app.get('/multiplica', function(req, res) {
 		var meuZ = require('./ze2');
 		var valorDeZ = meuZ.saiz;
 		res.send('x + y = ' + valorDeZ);
@@ -303,7 +304,8 @@ A linha:
 usa o comando 'require' do próprio NodeJS para carregar o módulo 'ze2.js'
 na variável 'meuZ'.
 Aí, na linha de baixo usamos 'meuZ' como uma "chamada de função" e pedimos
-o valor 'saiz', que é o nome que o mundo exterior conhece desse módulo.
+o valor 'saiz', que é o nome que o mundo exterior conhece desse módulo
+(foi o que nós "exportamos, lembra?).
 Finalmente mandamos para a janela do navegador 'valorDeZ'.
 Coloquemos então esse código em nosso arquivo web4.js salvando-o agora
 como web5.js:
@@ -347,5 +349,147 @@ como web5.js:
 
 	//			Arquivo web5.js
 
+
+Rode com 'node web5', acesse a URL com a rota '/multiplica' e veja que
+tudo funciona.
+Melhor ainda, o código ficou mais "enxuto".
+
+Vamos fazer o mesmo com as rotas para '/' e '/teste'.
+
+Começando com '/': tiramos tudo antes de 'res.send()' e botamos num arquivo.
+Vamos chamá-lo de 'raiz.js' e exportemos a variável 'aviso' (e dessa vez
+vamos exportá-la com o nome de 'aviso' mesmo):
+
+	/*
+	 *
+	 *
+	 *  Faz uma série de coisas
+	 *
+	 *
+	 */
+	var aviso = 'Seu servidor diz alô!';
+	module.exports.aviso = aviso;
+
+	//				Arquivo (módulo) raiz.js
+
+	
+E fazendo a mesma coisa com '/teste', criamos um módulo chamado 'teste.js':
+
+	/*
+	 *
+	 *
+	 * Faz uma outra série de coisas
+	 *
+	 *
+	 */
+	var aloteste = '<h1>A página de teste do seu servidor diz alô!</h1>';
+	module.exports.aloteste = aloteste;
+
+	//				Arquivo (módulo) teste.js
+
+
+Temos os módulos; vamos usá-los em web5.js (salvando como web6.js):
+
+	var express = require('express'); // carrega o módulo ExpressJS
+	var app = new express(); // cria uma instância
+
+	app.listen(3000, function() {
+		console.log('Escutando na porta 3000');
+	});
+
+	app.get('/', function(req, res) {
+		var trataRaiz = require('./raiz');
+		res.send(trataRaiz.aviso);
+	});
+
+	app.get('/teste', function(req, res) {
+		var trataTeste = require('./teste.js');
+		res.send(trataTeste.aloteste);
+	});
+
+	app.get('/multiplica', function(req, res) {
+		var meuZ = require('./ze2');
+		var valorDeZ = meuZ.saiz;
+		res.send('x * y = ' + valorDeZ);
+	});
+
+	//			Arquivo web6.js
+
+
+Note que fomos um pouco mais econômicos e ao invés de criar uma
+variável para conter a resposta de cada módulo (como fizemos no caso de 
+'/multiplica' usando 'valorDeZ'), chamamos diretamente o módulo
+dentro da função 'res.send()'.
+
+Rode 'node web6' e teste todas as 3 URLs (http://localhost:3000/ , 
+http://localhost:3000/teste , http://localhost:3000/multiplica ).
+Se você não digitou nada errado, as 3 familiares respostas devem
+ser apresentadas.
+E veja como o dódigo de web6.js ficou mais enxuto!
+
+Suponha agora que no espírito de "reaproveitar o código" queiramos
+usar o módulo 'ze2.js' também na rota '/teste'.
+Tentemos fazer o seguinte:
+
+	var express = require('express'); // carrega o módulo ExpressJS
+	var app = new express(); // cria uma instância
+
+	app.listen(3000, function() {
+		console.log('Escutando na porta 3000');
+	});
+
+	app.get('/', function(req, res) {
+		var trataRaiz = require('./raiz');
+		res.send(trataRaiz.aviso);
+	});
+
+	app.get('/teste', function(req, res) {
+		var trataTeste = require('./teste.js');
+		var meuZ = require('./ze2');				// <--- carrega
+		res.send(trataTeste.aloteste + meuZ.saiz);  // <--- e usa
+	});
+
+	app.get('/multiplica', function(req, res) {
+		var meuZ = require('./ze2');
+		var valorDeZ = meuZ.saiz;
+		res.send('x * y = ' + valorDeZ);
+	});
+
+	//			Arquivo web7.js
+
+Rode 'node web7', acesse http://localhost:3000/teste e você
+será apresentado com as 2 mensagens.
+
+Se você tiver um monte de módulos (nós já temos 3) e for reutilizar
+esse módulos em vários lugares, não seria melhor carregá-los todos
+no início e aí é só ir usando conforme a necessidade? Assim:
+
+	var express = require('express'); // carrega o módulo ExpressJS
+	var app = new express(); // cria uma instância
+
+	var trataRaiz = require('./raiz');
+	var trataTeste = require('./teste.js');
+	var meuZ = require('./ze2');
+
+	app.listen(3000, function() {
+		console.log('Escutando na porta 3000');
+	});
+
+	app.get('/', function(req, res) {
+		res.send(trataRaiz.aviso);
+	});
+
+	app.get('/teste', function(req, res) {
+		res.send(trataTeste.aloteste + meuZ.saiz);
+	});
+
+	app.get('/multiplica', function(req, res) {
+		var valorDeZ = meuZ.saiz;
+		res.send('x * y = ' + valorDeZ);
+	});
+
+	//			Arquivo web8.js
+
+Teste e veja que tudo funciona! Sem pegadinhas!
 
 
