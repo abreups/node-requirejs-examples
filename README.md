@@ -140,7 +140,7 @@ Basta incluir essa rota em uma outra linha com 'app.get()', assim:
 	//			Arquivo web3.js
 
 Rode 'node web3' e dê refresh na URL 'localhost:3000/teste'
-Note que inserimos a tag HTML "<h1>" no texto enviado ao navegador e
+Note que inserimos a tag HTML "H1" no texto enviado ao navegador e
 você provavelmente vai ver a mensagem com caracteres maiores
 na janela do seu browser.
 
