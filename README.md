@@ -86,10 +86,11 @@ Copie o arquivo web1.js com o nome de web2.js e edite-o assim:
 	});
 
 	app.get('/', function(req, res) {
-		res.send('Seu servidor diz alô!');
+		var aviso = 'Seu servidor diz alô!';
+		res.send(aviso);
 	});
 
-				Arquivo web2.js
+	//			Arquivo web2.js
 
 Execute com o comando
 
@@ -115,6 +116,236 @@ A título de experiência tente acessar a seguinte URL:
 e você vai receber a infame resposta: "Cannot GET /teste".
 Faz sentido, não? Pois nosso código não diz o que é para ser
 feito quando acessamos '/teste'; ele só trata o acesso a '/'.
+
+E como fazemos para a aplicação responder ao acesso a '/teste'?
+Basta incluir essa rota em uma outra linha com 'app.get()', assim:
+
+	var express = require('express'); // carrega o módulo ExpressJS
+	var app = new express(); // cria uma instância
+
+	app.listen(3000, function() {
+		console.log('Escutando na porta 3000');
+	});
+
+	app.get('/', function(req, res) {
+		var aviso = 'Seu servidor diz alô!';
+		res.send(aviso);
+	});
+
+	app.get('/teste', function(req, res) {
+		var aloteste = '<h1>A página de teste do seu servidor diz alô!</h1>';
+		res.send(aloteste);
+	});
+
+	//			Arquivo web3.js
+
+Rode 'node web3' e dê refresh na URL 'localhost:3000/teste'
+Note que inserimos a tag HTML <h1> no texto enviado ao navegador e
+você provavelmente vai ver a mensagem com caracteres maiores
+na janela do seu browser.
+
+Muito bem. Até agora tivemos uma passada rápida na funcionaliade
+de rotas do Express.
+Agora imagine que seu código vai crescendo, você vai acrescentando
+mais funções e as linhas de código vão aumentando e ele vai ficando
+bem feinho, parecendo uma linguiça enorme de linhas de código. Algo
+bem pior do que o código abaixo:
+
+var express = require('express'); // carrega o módulo ExpressJS
+var app = new express(); // cria uma instância
+
+app.listen(3000, function() {
+	console.log('Escutando na porta 3000');
+});
+
+app.get('/', function(req, res) {
+	/*
+	 *
+	 *
+	 *
+	 *
+	 *  Faz uma série de coisas
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	var aviso = 'Seu servidor diz alô!';
+	res.send(aviso);
+});
+
+app.get('/teste', function(req, res) {
+	/*
+	 *
+	 *
+	 *
+	 *
+	 * Faz uma outra série de coisas
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+ 	var aloteste = '<h1>A página de teste do seu servidor diz alô!</h1>';
+	res.send(aloteste);
+});
+
+app.get('/multiplica', function(req, res) {
+	var x = 5;
+	var y = 3;
+	/*
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *  Faz mais um monte de coisas complicadas
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	var z = x * y;
+	res.send('x * y = ' + z);
+});
+
+	//			Arquivo web4.js
+
+
+Veja que já está ficando difícil de ler o código e quanto mais
+ele cresce pior fica para visualizar as coisas e por consequência,
+entendê-las.
+Será que tem um jeito de colocar os códigos que estão dentro
+das chamadas 'app.get()' em um outro lugar e chamá-los como
+uma "função" ou algo parecido?
+Com certeza, e o NodeJS pode fazer isso usando 'exports'.
+(Calma, não chegamos no RequireJS ainda; mas é importante entender
+esses conceitos do 'exports').
+
+
+NodeJS exports
+
+Primeiro vamos pegar (quase) todo o código da rota '/multiplica'
+e colocá-lo em um arquivo separado. Ao invés de chamar esse arquivo
+de 'multiplica.js' vamos denominá-lo de "Zé.js" (pra quem está no começo
+acho confuso esse negócio do arquivo ter o mesmo nome da variável
+que tem o mesmo nome da função, etc. Vamos radicalizar).
+
+Nosso arquivo 'ze1.js' (em minúsculas e sem o acento) fica assim:
+
+	var x = 5;
+	var y = 3;
+	/*
+	 *
+	 *  Faz mais um monte de coisas complicadas
+	 *
+	 *
+	 */
+	var z = x * y;
+
+	//					Arquivo ze1.js
+
+Acabamos de criar um módulo no NodeJS (bem... quase).
+Agora temos que dar um jeito da variável 'z' ser "exportada" para
+fora desse módulo, caso contrário ela só existe no escopo do módulo,
+o que não é muito útil pra gente.
+Para "exportar" a variável 'z' usamos a seguinte linha de código:
+
+	module.exports.saiz = z;
+
+Essa linha diz o seguinte: "Ô módulo, exporta a variável 'z' e
+passa ela pro mundo exterior com o nome de 'saiz'".
+Nosso módulo fica então assim:
+
+	var x = 5;
+	var y = 3;
+	/*
+	 *
+	 *  Faz mais um monte de coisas complicadas
+	 *
+	 *
+	 */
+	var z = x * y;
+	module.exports.saiz = z;
+
+	//					Arquivo ze2.js
+
+Agora voltemos no código da rota '/multiplica' e usemos esse módulo.
+A parte do código fica assim:
+
+	.
+	.
+	.
+	app.get('/soma', function(req, res) {
+		var meuZ = require('./ze2');
+		var valorDeZ = meuZ.saiz;
+		res.send('x + y = ' + valorDeZ);
+	});
+	.
+	.
+	.
+
+A linha:
+
+	var meuZ = require('./ze2'); 
+
+usa o comando 'require' do próprio NodeJS para carregar o módulo 'ze2.js'
+na variável 'meuZ'.
+Aí, na linha de baixo usamos 'meuZ' como uma "chamada de função" e pedimos
+o valor 'saiz', que é o nome que o mundo exterior conhece desse módulo.
+Finalmente mandamos para a janela do navegador 'valorDeZ'.
+Coloquemos então esse código em nosso arquivo web4.js salvando-o agora
+como web5.js:
+
+	var express = require('express'); // carrega o módulo ExpressJS
+	var app = new express(); // cria uma instância
+
+	app.listen(3000, function() {
+		console.log('Escutando na porta 3000');
+	});
+
+	app.get('/', function(req, res) {
+		/*
+		 *
+		 *
+		 *  Faz uma série de coisas
+		 *
+		 *
+		 */
+		var aviso = 'Seu servidor diz alô!';
+		res.send(aviso);
+	});
+
+	app.get('/teste', function(req, res) {
+		/*
+		 *
+		 *
+		 * Faz uma outra série de coisas
+		 *
+		 *
+		 */
+		var aloteste = '<h1>A página de teste do seu servidor diz alô!</h1>';
+		res.send(aloteste);
+	});
+
+	app.get('/multiplica', function(req, res) {
+		var meuZ = require('./ze2');
+		var valorDeZ = meuZ.saiz;
+		res.send('x * y = ' + valorDeZ);
+	});
+
+	//			Arquivo web5.js
 
 
 
