@@ -140,7 +140,7 @@ Basta incluir essa rota em uma outra linha com 'app.get()', assim:
 	//			Arquivo web3.js
 
 Rode 'node web3' e dê refresh na URL 'localhost:3000/teste'
-Note que inserimos a tag HTML <h1> no texto enviado ao navegador e
+Note que inserimos a tag HTML "<h1>" no texto enviado ao navegador e
 você provavelmente vai ver a mensagem com caracteres maiores
 na janela do seu browser.
 
@@ -151,74 +151,74 @@ mais funções e as linhas de código vão aumentando e ele vai ficando
 bem feinho, parecendo uma linguiça enorme de linhas de código. Algo
 bem pior do que o código abaixo:
 
-var express = require('express'); // carrega o módulo ExpressJS
-var app = new express(); // cria uma instância
+	var express = require('express'); // carrega o módulo ExpressJS
+	var app = new express(); // cria uma instância
 
-app.listen(3000, function() {
-	console.log('Escutando na porta 3000');
-});
+	app.listen(3000, function() {
+		console.log('Escutando na porta 3000');
+	});
 
-app.get('/', function(req, res) {
-	/*
-	 *
-	 *
-	 *
-	 *
-	 *  Faz uma série de coisas
-	 *
-	 *
-	 *
-	 *
-	 *
-	 */
-	var aviso = 'Seu servidor diz alô!';
-	res.send(aviso);
-});
+	app.get('/', function(req, res) {
+		/*
+		 *
+		 *
+		 *
+		 *
+		 *  Faz uma série de coisas
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+		var aviso = 'Seu servidor diz alô!';
+		res.send(aviso);
+	});
 
-app.get('/teste', function(req, res) {
-	/*
-	 *
-	 *
-	 *
-	 *
-	 * Faz uma outra série de coisas
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 */
- 	var aloteste = '<h1>A página de teste do seu servidor diz alô!</h1>';
-	res.send(aloteste);
-});
+	app.get('/teste', function(req, res) {
+		/*
+		 *
+		 *
+		 *
+		 *
+		 * Faz uma outra série de coisas
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+		var aloteste = '<h1>A página de teste do seu servidor diz alô!</h1>';
+		res.send(aloteste);
+	});
 
-app.get('/multiplica', function(req, res) {
-	var x = 5;
-	var y = 3;
-	/*
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *  Faz mais um monte de coisas complicadas
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 */
-	var z = x * y;
-	res.send('x * y = ' + z);
-});
+	app.get('/multiplica', function(req, res) {
+		var x = 5;
+		var y = 3;
+		/*
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *  Faz mais um monte de coisas complicadas
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+		var z = x * y;
+		res.send('x * y = ' + z);
+	});
 
 	//			Arquivo web4.js
 
